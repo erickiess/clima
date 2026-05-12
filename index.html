@@ -365,6 +365,23 @@
 </div>
 
 <script>
+// Capturador global de errores - muestra cualquier crash JS en pantalla
+window.onerror = function(msg, src, line, col, err) {
+  try {
+    var l = document.getElementById('loading');
+    if (l) {
+      l.style.opacity = '1';
+      l.classList.remove('hidden');
+      l.innerHTML = '<div style="text-align:center;padding:20px;max-width:90%;">'
+        + '<div style="font-size:18px;color:#f44336;margin-bottom:12px;">⚠ Error JS</div>'
+        + '<div style="font-size:12px;color:#9aa0a6;word-break:break-word;">'
+        + String(msg) + '<br>línea ' + line + ':' + col
+        + '</div></div>';
+    }
+  } catch(e){}
+  return false;
+};
+
 // ============================================
 // CONFIG
 // ============================================
@@ -501,34 +518,70 @@ async function fetchWeather(){
     `precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,cloud_cover_mean` +
     `&timezone=${encodeURIComponent(TZ)}&forecast_days=7`;
 
-  // URLs a probar en orden: directa, proxies CORS, todo HTTPS pero con certs modernos
-  // Los proxies sirven como bridge para Android viejos con CA roots vencidos
+  // URLs a probar en orden
   const urls = [
-    apiUrl,
-    'https://corsproxy.io/?' + encodeURIComponent(apiUrl),
-    'https://api.allorigins.win/raw?url=' + encodeURIComponent(apiUrl),
-    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(apiUrl)
+    { name: 'Open-Meteo directo', url: apiUrl },
+    { name: 'corsproxy.io', url: 'https://corsproxy.io/?' + encodeURIComponent(apiUrl) },
+    { name: 'allorigins.win', url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent(apiUrl) },
+    { name: 'codetabs.com', url: 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(apiUrl) }
   ];
 
-  let lastErr = null;
-  for (const u of urls) {
+  // Fetch con timeout manual (Android 6 no soporta AbortController bien)
+  function fetchWithTimeout(url, ms) {
+    return new Promise(function(resolve, reject) {
+      var done = false;
+      var timer = setTimeout(function() {
+        if (!done) { done = true; reject(new Error('Timeout ' + ms + 'ms')); }
+      }, ms);
+      fetch(url).then(function(r) {
+        if (done) return;
+        done = true; clearTimeout(timer); resolve(r);
+      }).catch(function(e) {
+        if (done) return;
+        done = true; clearTimeout(timer); reject(e);
+      });
+    });
+  }
+
+  // Mostrar progreso en pantalla
+  function showStatus(msg) {
     try {
-      const resp = await fetch(u, { method: 'GET' });
-      if (!resp.ok) { lastErr = new Error('HTTP ' + resp.status); continue; }
-      const data = await resp.json();
-      if (!data || !data.current) { lastErr = new Error('Datos vacíos'); continue; }
-      // éxito: cache y return
+      var l = document.getElementById('loading');
+      if (l && !l.classList.contains('hidden')) {
+        l.innerHTML = '<div style="text-align:center;padding:20px;max-width:90%;">'
+          + '<div style="font-size:18px;color:#9aa0a6;margin-bottom:12px;">Cargando...</div>'
+          + '<div style="font-size:12px;color:#5f6368;word-break:break-word;">' + msg + '</div>'
+          + '</div>';
+      }
+    } catch(e){}
+  }
+
+  var attempts = [];
+  for (var i = 0; i < urls.length; i++) {
+    var u = urls[i];
+    showStatus('Probando: ' + u.name + ' (' + (i+1) + '/' + urls.length + ')');
+    try {
+      var resp = await fetchWithTimeout(u.url, 8000);
+      if (!resp.ok) {
+        attempts.push(u.name + ': HTTP ' + resp.status);
+        continue;
+      }
+      var data = await resp.json();
+      if (!data || !data.current) {
+        attempts.push(u.name + ': sin data.current');
+        continue;
+      }
       try {
         localStorage.setItem('clima_cache', JSON.stringify({ data: data, ts: Date.now() }));
       } catch(e) {}
       return data;
     } catch(e) {
-      lastErr = e;
-      // probar próximo proxy
+      attempts.push(u.name + ': ' + (e.message || e));
       continue;
     }
   }
-  throw lastErr || new Error('Todos los endpoints fallaron');
+  // todos fallaron: tirar error con detalle
+  throw new Error('Todos fallaron:\n' + attempts.join('\n'));
 }
 
 // ============================================
@@ -715,21 +768,21 @@ function render(d){
     sem.rafagas.appendChild(tdR);
 
     // nubes
-    const n = today.cloud_cover_mean[i] ?? 0;
+    const n = (today.cloud_cover_mean && today.cloud_cover_mean[i] != null) ? today.cloud_cover_mean[i] : 0;
     const tdN = document.createElement('td');
     tdN.textContent = Math.round(n);
     tdN.style.background = cloudColor(n);
     sem.nubes.appendChild(tdN);
 
     // mm total
-    const ps = today.precipitation_sum[i] ?? 0;
+    const ps = (today.precipitation_sum && today.precipitation_sum[i] != null) ? today.precipitation_sum[i] : 0;
     const tdMm = document.createElement('td');
     tdMm.textContent = ps < 0.1 ? '0' : ps.toFixed(1);
     tdMm.style.background = rainMmColor(ps);
     sem.mm.appendChild(tdMm);
 
     // lluvia %
-    const pp = today.precipitation_probability_max[i] ?? 0;
+    const pp = (today.precipitation_probability_max && today.precipitation_probability_max[i] != null) ? today.precipitation_probability_max[i] : 0;
     const tdLp = document.createElement('td');
     tdLp.textContent = Math.round(pp);
     tdLp.style.background = rainPctColor(pp);
