@@ -492,7 +492,7 @@ function updateSunProgress(sunriseStr, sunsetStr){
 // FETCH OPEN-METEO
 // ============================================
 async function fetchWeather(){
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
+  const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
     `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,` +
     `cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_gusts_10m` +
     `&hourly=temperature_2m,weather_code,cloud_cover,precipitation,precipitation_probability,` +
@@ -501,13 +501,34 @@ async function fetchWeather(){
     `precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,cloud_cover_mean` +
     `&timezone=${encodeURIComponent(TZ)}&forecast_days=7`;
 
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  const data = await resp.json();
+  // URLs a probar en orden: directa, proxies CORS, todo HTTPS pero con certs modernos
+  // Los proxies sirven como bridge para Android viejos con CA roots vencidos
+  const urls = [
+    apiUrl,
+    'https://corsproxy.io/?' + encodeURIComponent(apiUrl),
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(apiUrl),
+    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(apiUrl)
+  ];
 
-  // cache
-  localStorage.setItem('clima_cache', JSON.stringify({ data, ts: Date.now() }));
-  return data;
+  let lastErr = null;
+  for (const u of urls) {
+    try {
+      const resp = await fetch(u, { method: 'GET' });
+      if (!resp.ok) { lastErr = new Error('HTTP ' + resp.status); continue; }
+      const data = await resp.json();
+      if (!data || !data.current) { lastErr = new Error('Datos vacíos'); continue; }
+      // éxito: cache y return
+      try {
+        localStorage.setItem('clima_cache', JSON.stringify({ data: data, ts: Date.now() }));
+      } catch(e) {}
+      return data;
+    } catch(e) {
+      lastErr = e;
+      // probar próximo proxy
+      continue;
+    }
+  }
+  throw lastErr || new Error('Todos los endpoints fallaron');
 }
 
 // ============================================
@@ -740,6 +761,20 @@ async function update(){
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('lastUpdate').textContent = 'Sin conexión · datos en caché';
       } catch(e2){}
+    } else {
+      // Sin caché ni datos: mostrar el error en pantalla para debug
+      const loadingEl = document.getElementById('loading');
+      if (loadingEl) {
+        loadingEl.innerHTML = '<div style="text-align:center;padding:20px;max-width:90%;">'
+          + '<div style="font-size:18px;color:#f44336;margin-bottom:12px;">⚠ Error al cargar</div>'
+          + '<div style="font-size:13px;color:#9aa0a6;margin-bottom:8px;">'
+          + (e && e.message ? String(e.message) : 'Error desconocido')
+          + '</div>'
+          + '<div style="font-size:11px;color:#5f6368;">Reintentando en 30s...</div>'
+          + '</div>';
+      }
+      // reintentar más rápido si nunca cargó
+      setTimeout(update, 30000);
     }
   }
 }
