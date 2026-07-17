@@ -1,0 +1,33 @@
+name: Actualizar datos del clima
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # cada 15 minutos
+  workflow_dispatch:          # permite ejecutarlo a mano desde la pestaña Actions
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Descargar datos de Open-Meteo
+        run: |
+          URL="https://api.open-meteo.com/v1/forecast?latitude=-38.9516&longitude=-68.0591&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,cloud_cover,precipitation,pressure_msl,wind_speed_10m,wind_gusts_10m&hourly=temperature_2m,weather_code,cloud_cover,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,cloud_cover_mean&timezone=America%2FArgentina%2FSalta&forecast_days=7"
+          curl -sf --retry 3 --retry-delay 10 "$URL" -o /tmp/clima.json
+          # validar que sea JSON con datos
+          python3 -c "import json; d=json.load(open('/tmp/clima.json')); assert 'current' in d"
+          printf 'window.CLIMA_DATA=' > data.js
+          cat /tmp/clima.json >> data.js
+          printf ';window.CLIMA_TS=%s;' "$(date +%s)000" >> data.js
+
+      - name: Commitear si cambió
+        run: |
+          git config user.name "clima-bot"
+          git config user.email "actions@github.com"
+          git add data.js
+          git diff --cached --quiet || git commit -m "datos $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git push
