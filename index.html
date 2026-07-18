@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=1280, initial-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Clima Neuquén</title>
-  <!-- v2.5 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades · reloj gigante · divisor de día en tabla horaria -->
+  <!-- v2.6 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades · reloj 86px · divisor de día · 7 días agrandado -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -14,13 +14,13 @@
       font-family: 'Segoe UI', Roboto, Arial, sans-serif;
       color: #e8eaed;
     }
-    body { padding: 8px; }
+    body { padding: 5px; }
 
     .dashboard {
       width: 100%; height: 100%;
       background: #1a1f2e;
       border-radius: 8px;
-      padding: 10px;
+      padding: 7px;
       display: -webkit-flex; display: flex;
       -webkit-flex-direction: column; flex-direction: column;
     }
@@ -28,9 +28,9 @@
     /* HEADER */
     .header {
       display: -webkit-flex; display: flex;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
-    .header > .card { margin-right: 8px; }
+    .header > .card { margin-right: 6px; }
     .header > .card:last-child { margin-right: 0; }
     .card {
       background: #232838;
@@ -44,10 +44,10 @@
 
     /* Reloj */
     .card-clock { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: center; justify-content: center; }
-    .card-clock .city { font-size: 12px; color: #9aa0a6; letter-spacing: 1px; }
-    .card-clock .time { font-size: 76px; font-weight: 500; line-height: 1; color: #fff; margin-top: 3px; letter-spacing: 1px; }
-    .card-clock .time .sec { font-size: 28px; color: #9aa0a6; font-weight: 400; }
+    .card-clock .time { font-size: 86px; font-weight: 500; line-height: 1; color: #fff; letter-spacing: 1px; }
+    .card-clock .time .sec { font-size: 30px; color: #9aa0a6; font-weight: 400; }
     .card-clock .date { font-size: 13px; color: #c5c9ce; margin-top: 6px; }
+    .card-clock .date .city { color: #9aa0a6; }
 
     /* unidad de medida: chica y atenuada al lado de cada número */
     .u { font-size: 10px; color: rgba(255,255,255,0.55); margin-left: 2px; font-weight: 400; }
@@ -150,16 +150,16 @@
 
     .tabla-semana {
       width: 100%;
-      border-collapse: separate; border-spacing: 1px;
-      font-size: 13px; text-align: center;
+      border-collapse: separate; border-spacing: 2px;
+      font-size: 16px; text-align: center;
     }
-    .tabla-semana td { padding: 4px 3px; border-radius: 3px; }
+    .tabla-semana td { padding: 5px 3px; border-radius: 3px; }
     .tabla-semana .row-label {
       text-align: left; color: #9aa0a6;
-      padding: 2px 6px; font-size: 12px; width: 125px;
+      padding: 2px 6px; font-size: 14px; width: 125px;
       background: none; white-space: nowrap;
     }
-    .tabla-semana .row-label .emo { font-size: 13px; margin-right: 4px; }
+    .tabla-semana .row-label .emo { font-size: 15px; margin-right: 4px; }
     .tabla-semana .dia-hoy {
       color: #fff;
       background: rgba(249,171,0,0.2);
@@ -168,18 +168,18 @@
     .tabla-semana .cond-cell { padding: 2px; background: none; font-size: 20px; }
 
     /* Celda diagonal max/min */
-    .maxmin-cell { padding: 0 !important; height: 44px; background: none !important; }
+    .maxmin-cell { padding: 0 !important; height: 50px; background: none !important; }
     .maxmin-box { position: relative; height: 100%; border-radius: 4px; overflow: hidden; }
     .maxmin-box .max-num {
       position: absolute; top: 0; left: 0;
-      padding: 4px 0 0 8px;
-      font-size: 16px; font-weight: 500; color: #fff;
+      padding: 4px 0 0 9px;
+      font-size: 20px; font-weight: 500; color: #fff;
       z-index: 2;
     }
     .maxmin-box .min-num {
       position: absolute; bottom: 0; right: 0;
-      padding: 0 8px 4px 0;
-      font-size: 16px; font-weight: 500; color: #bcd9ff;
+      padding: 0 9px 4px 0;
+      font-size: 20px; font-weight: 500; color: #bcd9ff;
       z-index: 2;
     }
     .maxmin-box .diagonal {
@@ -217,10 +217,10 @@
       vertical-align: middle;
     }
     .wi-s {
-      width: 24px; height: 24px;
+      width: 30px; height: 30px;
     }
     .wi-s .wi-in {
-      -webkit-transform: scale(0.6); transform: scale(0.6);
+      -webkit-transform: scale(0.75); transform: scale(0.75);
       -webkit-transform-origin: 0 0; transform-origin: 0 0;
     }
     .wi-in { position: absolute; left: 0; top: 0; width: 40px; height: 40px; }
@@ -366,9 +366,8 @@
   <div class="header">
 
     <div class="card card-clock">
-      <div class="city">NEUQU&Eacute;N CAPITAL</div>
       <div class="time" id="clock">--:--</div>
-      <div class="date" id="date">&mdash;</div>
+      <div class="date"><span id="date">&mdash;</span> &middot; <span class="city">NEUQU&Eacute;N</span></div>
     </div>
 
     <div class="card card-temp">
@@ -603,7 +602,7 @@ function tick() {
   var n = ahora();
   document.getElementById('clock').innerHTML = pad(n.getHours()) + ':' + pad(n.getMinutes()) + '<span class="sec">:' + pad(n.getSeconds()) + '</span>';
   document.getElementById('date').innerHTML =
-    DIAS[n.getDay()] + ', ' + n.getDate() + ' de ' + MESES[n.getMonth()] + ' de ' + n.getFullYear();
+    DIAS[n.getDay()] + ' ' + n.getDate() + ' de ' + MESES[n.getMonth()];
 }
 tick();
 setInterval(tick, 1000);
