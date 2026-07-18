@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=1280, initial-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Clima Neuquén</title>
-  <!-- v2.6 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades · reloj 86px · divisor de día · 7 días agrandado -->
+  <!-- v2.7 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades · reloj 104px · columnas iguales (table-layout fixed) · todo agrandado, márgenes al mínimo -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -14,13 +14,13 @@
       font-family: 'Segoe UI', Roboto, Arial, sans-serif;
       color: #e8eaed;
     }
-    body { padding: 5px; }
+    body { padding: 4px; }
 
     .dashboard {
       width: 100%; height: 100%;
       background: #1a1f2e;
-      border-radius: 8px;
-      padding: 7px;
+      border-radius: 6px;
+      padding: 5px;
       display: -webkit-flex; display: flex;
       -webkit-flex-direction: column; flex-direction: column;
     }
@@ -28,14 +28,14 @@
     /* HEADER */
     .header {
       display: -webkit-flex; display: flex;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
-    .header > .card { margin-right: 6px; }
+    .header > .card { margin-right: 5px; }
     .header > .card:last-child { margin-right: 0; }
     .card {
       background: #232838;
       border-radius: 8px;
-      padding: 10px;
+      padding: 8px 10px;
     }
     .card-clock { -webkit-flex: 1.2; flex: 1.2; }
     .card-temp  { -webkit-flex: 1.2; flex: 1.2; }
@@ -44,9 +44,9 @@
 
     /* Reloj */
     .card-clock { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: center; justify-content: center; }
-    .card-clock .time { font-size: 86px; font-weight: 500; line-height: 1; color: #fff; letter-spacing: 1px; }
-    .card-clock .time .sec { font-size: 30px; color: #9aa0a6; font-weight: 400; }
-    .card-clock .date { font-size: 13px; color: #c5c9ce; margin-top: 6px; }
+    .card-clock .time { font-size: 90px; font-weight: 500; line-height: 1; color: #fff; letter-spacing: 1px; }
+    .card-clock .time .sec { font-size: 32px; color: #9aa0a6; font-weight: 400; }
+    .card-clock .date { font-size: 15px; color: #c5c9ce; margin-top: 6px; }
     .card-clock .date .city { color: #9aa0a6; }
 
     /* unidad de medida: chica y atenuada al lado de cada número */
@@ -75,20 +75,20 @@
 
     /* Temp principal */
     .card-temp .row1 { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; }
-    .card-temp .now { font-size: 60px; font-weight: 500; line-height: 0.9; color: #f9ab00; margin-right: 10px; }
-    .card-temp .max { font-size: 24px; font-weight: 500; color: #ff6d00; line-height: 1; }
-    .card-temp .min { font-size: 24px; font-weight: 500; color: #4fc3f7; line-height: 1; }
-    .card-temp .cond { margin-top: 6px; font-size: 15px; }
+    .card-temp .now { font-size: 74px; font-weight: 500; line-height: 0.9; color: #f9ab00; margin-right: 12px; }
+    .card-temp .max { font-size: 28px; font-weight: 500; color: #ff6d00; line-height: 1; }
+    .card-temp .min { font-size: 28px; font-weight: 500; color: #4fc3f7; line-height: 1; }
+    .card-temp .cond { margin-top: 8px; font-size: 17px; }
     .card-temp .cond-text { font-weight: 500; }
-    .card-temp .feels { font-size: 12px; color: #9aa0a6; margin-left: 6px; }
+    .card-temp .feels { font-size: 13px; color: #9aa0a6; margin-left: 6px; }
 
     /* Viento */
-    .card-wind .label { font-size: 10px; color: #9aa0a6; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .card-wind .label { font-size: 12px; color: #9aa0a6; letter-spacing: 0.5px; margin-bottom: 5px; }
     .card-wind .row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; }
-    .card-wind .icon { font-size: 30px; margin-right: 8px; }
-    .card-wind .speed { font-size: 30px; font-weight: 500; color: #fff; line-height: 1; }
-    .card-wind .unit { font-size: 11px; color: #9aa0a6; }
-    .card-wind .gusts { margin-top: 6px; font-size: 13px; color: #ff6d00; font-weight: 500; }
+    .card-wind .icon { font-size: 38px; margin-right: 10px; }
+    .card-wind .speed { font-size: 38px; font-weight: 500; color: #fff; line-height: 1; }
+    .card-wind .unit { font-size: 13px; color: #9aa0a6; }
+    .card-wind .gusts { margin-top: 8px; font-size: 15px; color: #ff6d00; font-weight: 500; }
 
     /* Stats grid */
     .stats { padding: 8px; }
@@ -96,15 +96,15 @@
     .stats .srow:first-child { margin-bottom: 5px; }
     .stat-box { background: #1a1f2e; border-radius: 5px; padding: 5px 7px; -webkit-flex: 1; flex: 1; margin-right: 5px; }
     .stat-box:last-child { margin-right: 0; }
-    .stat-box .lbl { font-size: 11px; color: #9aa0a6; white-space: nowrap; }
-    .stat-box .val { font-size: 20px; font-weight: 500; }
+    .stat-box .lbl { font-size: 12px; color: #9aa0a6; white-space: nowrap; }
+    .stat-box .val { font-size: 26px; font-weight: 500; }
 
     /* HOY POR HORA */
     .hoy-card {
       background: #232838;
       border-radius: 8px;
-      padding: 12px 14px;
-      margin-bottom: 8px;
+      padding: 8px 10px;
+      margin-bottom: 5px;
       border: 1.5px solid #4a5160;
       -webkit-flex: 1; flex: 1;
       display: -webkit-flex; display: flex;
@@ -114,23 +114,24 @@
       display: -webkit-flex; display: flex;
       -webkit-justify-content: space-between; justify-content: space-between;
       -webkit-align-items: center; align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
     }
-    .hoy-title { font-size: 16px; color: #fff; letter-spacing: 0.5px; font-weight: 500; }
+    .hoy-title { font-size: 17px; color: #fff; letter-spacing: 0.5px; font-weight: 500; }
     .hoy-sub { font-size: 12px; color: #5f6368; }
 
     .tabla-hoy {
       width: 100%; height: 100%;
+      table-layout: fixed;
       border-collapse: separate; border-spacing: 2px;
-      font-size: 16px; text-align: center;
+      font-size: 19px; text-align: center;
     }
-    .tabla-hoy td { padding: 7px 6px; border-radius: 4px; }
+    .tabla-hoy td { padding: 4px; border-radius: 4px; }
     .tabla-hoy .row-label {
       text-align: left; color: #9aa0a6;
-      padding: 4px 8px; font-size: 14px; width: 125px;
+      padding: 4px 8px; font-size: 15px; width: 120px;
       background: none; white-space: nowrap;
     }
-    .row-label .emo { font-size: 15px; margin-right: 5px; vertical-align: -1px; }
+    .row-label .emo { font-size: 16px; margin-right: 5px; vertical-align: -1px; }
     .tabla-hoy .hora-now {
       color: #fff;
       background: rgba(249,171,0,0.25);
@@ -138,28 +139,29 @@
     }
     /* línea divisoria: arranca un día nuevo en la tabla horaria */
     .tabla-hoy .dia-sep { box-shadow: inset 4px 0 0 0 #ffb300; }
-    .tabla-hoy .dnuevo { color: #ffb300; font-weight: 600; margin-right: 2px; }
+    .tabla-hoy .dnuevo { color: #ffb300; font-weight: 600; font-size: 11px; margin-right: 1px; vertical-align: 1px; }
 
     /* 7 DÍAS */
     .semana-card {
       background: #232838;
       border-radius: 8px;
-      padding: 8px 12px;
+      padding: 6px 10px;
     }
-    .semana-title { font-size: 13px; color: #fff; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 6px; }
+    .semana-title { font-size: 14px; color: #fff; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 5px; }
 
     .tabla-semana {
       width: 100%;
+      table-layout: fixed;
       border-collapse: separate; border-spacing: 2px;
-      font-size: 16px; text-align: center;
+      font-size: 19px; text-align: center;
     }
-    .tabla-semana td { padding: 5px 3px; border-radius: 3px; }
+    .tabla-semana td { padding: 3px; border-radius: 3px; }
     .tabla-semana .row-label {
       text-align: left; color: #9aa0a6;
-      padding: 2px 6px; font-size: 14px; width: 125px;
+      padding: 2px 6px; font-size: 15px; width: 120px;
       background: none; white-space: nowrap;
     }
-    .tabla-semana .row-label .emo { font-size: 15px; margin-right: 4px; }
+    .tabla-semana .row-label .emo { font-size: 16px; margin-right: 4px; }
     .tabla-semana .dia-hoy {
       color: #fff;
       background: rgba(249,171,0,0.2);
@@ -168,18 +170,18 @@
     .tabla-semana .cond-cell { padding: 2px; background: none; font-size: 20px; }
 
     /* Celda diagonal max/min */
-    .maxmin-cell { padding: 0 !important; height: 50px; background: none !important; }
+    .maxmin-cell { padding: 0 !important; height: 46px; background: none !important; }
     .maxmin-box { position: relative; height: 100%; border-radius: 4px; overflow: hidden; }
     .maxmin-box .max-num {
       position: absolute; top: 0; left: 0;
-      padding: 4px 0 0 9px;
-      font-size: 20px; font-weight: 500; color: #fff;
+      padding: 3px 0 0 10px;
+      font-size: 23px; font-weight: 500; color: #fff;
       z-index: 2;
     }
     .maxmin-box .min-num {
       position: absolute; bottom: 0; right: 0;
-      padding: 0 9px 4px 0;
-      font-size: 20px; font-weight: 500; color: #bcd9ff;
+      padding: 0 10px 3px 0;
+      font-size: 23px; font-weight: 500; color: #bcd9ff;
       z-index: 2;
     }
     .maxmin-box .diagonal {
