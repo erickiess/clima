@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=1280, initial-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Clima Neuquén</title>
-  <!-- v2.2 · datos pre-horneados por GitHub Actions · JS compatible ES5 (Android 6) · íconos animados · hora corregida por zona horaria de los datos -->
+  <!-- v2.3 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades en cada valor · jerarquía visual -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -37,15 +37,21 @@
       border-radius: 8px;
       padding: 10px;
     }
-    .card-clock { -webkit-flex: 1; flex: 1; }
-    .card-temp  { -webkit-flex: 1.3; flex: 1.3; }
+    .card-clock { -webkit-flex: 1.2; flex: 1.2; }
+    .card-temp  { -webkit-flex: 1.2; flex: 1.2; }
     .card-wind  { -webkit-flex: 0.9; flex: 0.9; }
     .card.stats { -webkit-flex: 1.1; flex: 1.1; }
 
     /* Reloj */
-    .card-clock .city { font-size: 12px; color: #9aa0a6; letter-spacing: 0.5px; }
-    .card-clock .time { font-size: 38px; font-weight: 500; line-height: 1; color: #fff; margin-top: 2px; }
-    .card-clock .date { font-size: 12px; color: #9aa0a6; margin-top: 4px; }
+    .card-clock { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: center; justify-content: center; }
+    .card-clock .city { font-size: 12px; color: #9aa0a6; letter-spacing: 1px; }
+    .card-clock .time { font-size: 54px; font-weight: 500; line-height: 1; color: #fff; margin-top: 3px; letter-spacing: 1px; }
+    .card-clock .time .sec { font-size: 24px; color: #9aa0a6; font-weight: 400; }
+    .card-clock .date { font-size: 13px; color: #c5c9ce; margin-top: 5px; }
+
+    /* unidad de medida: chica y atenuada al lado de cada número */
+    .u { font-size: 10px; color: rgba(255,255,255,0.55); margin-left: 2px; font-weight: 400; }
+    .row-label .u { color: #6a7180; margin-left: 4px; }
     .sun-bar { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; margin-top: 6px; font-size: 10px; }
     .sun-rise { color: #f9ab00; margin-right: 6px; white-space: nowrap; }
     .sun-set { color: #ff6d00; margin-left: 6px; white-space: nowrap; }
@@ -372,8 +378,8 @@
       <div class="row1">
         <div class="now" id="tempNow">--&deg;</div>
         <div>
-          <div><span style="font-size:12px;color:#ff6d00">&#9650;</span> <span class="max" id="tempMax">--&deg;</span></div>
-          <div style="margin-top:2px;"><span style="font-size:12px;color:#4fc3f7">&#9660;</span> <span class="min" id="tempMin">--&deg;</span></div>
+          <div><span style="font-size:12px;color:#ff6d00">&#9650;</span> <span class="max" id="tempMax">--&deg;</span> <span style="font-size:11px;color:#9aa0a6">M&aacute;x</span></div>
+          <div style="margin-top:3px;"><span style="font-size:12px;color:#4fc3f7">&#9660;</span> <span class="min" id="tempMin">--&deg;</span> <span style="font-size:11px;color:#9aa0a6">M&iacute;n</span></div>
         </div>
       </div>
       <div class="cond">
@@ -590,7 +596,7 @@ function ahora() { return new Date(new Date().getTime() + TZ_DELTA); }
 // ---- RELOJ ----
 function tick() {
   var n = ahora();
-  document.getElementById('clock').innerHTML = pad(n.getHours()) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds());
+  document.getElementById('clock').innerHTML = pad(n.getHours()) + ':' + pad(n.getMinutes()) + '<span class="sec">:' + pad(n.getSeconds()) + '</span>';
   document.getElementById('date').innerHTML =
     DIAS[n.getDay()] + ', ' + n.getDate() + ' de ' + MESES[n.getMonth()] + ' de ' + n.getFullYear();
 }
@@ -678,12 +684,12 @@ function render(d) {
     rows.hora.appendChild(tdH);
 
     rows.temp.appendChild(makeTd(Math.round(h.temperature_2m[idx]) + '°', tempColor(h.temperature_2m[idx])));
-    rows.viento.appendChild(makeTd(String(Math.round(h.wind_speed_10m[idx])), windColor(h.wind_speed_10m[idx])));
-    rows.rafagas.appendChild(makeTd(String(Math.round(h.wind_gusts_10m[idx])), gustColor(h.wind_gusts_10m[idx])));
-    rows.nubes.appendChild(makeTd(String(Math.round(h.cloud_cover[idx])), cloudColor(h.cloud_cover[idx])));
+    rows.viento.appendChild(makeTd(Math.round(h.wind_speed_10m[idx]) + '<span class="u">km/h</span>', windColor(h.wind_speed_10m[idx])));
+    rows.rafagas.appendChild(makeTd(Math.round(h.wind_gusts_10m[idx]) + '<span class="u">km/h</span>', gustColor(h.wind_gusts_10m[idx])));
+    rows.nubes.appendChild(makeTd(Math.round(h.cloud_cover[idx]) + '<span class="u">%</span>', cloudColor(h.cloud_cover[idx])));
     var mm = h.precipitation[idx];
-    rows.mmh.appendChild(makeTd(mm < 0.1 ? '0' : mm.toFixed(1), rainMmColor(mm)));
-    rows.lluviapct.appendChild(makeTd(String(Math.round(h.precipitation_probability[idx])), rainPctColor(h.precipitation_probability[idx])));
+    rows.mmh.appendChild(makeTd((mm < 0.1 ? '0' : mm.toFixed(1)) + '<span class="u">mm</span>', rainMmColor(mm)));
+    rows.lluviapct.appendChild(makeTd(Math.round(h.precipitation_probability[idx]) + '<span class="u">%</span>', rainPctColor(h.precipitation_probability[idx])));
   }
 
   // -- 7 DÍAS --
@@ -727,17 +733,17 @@ function render(d) {
       '<div class="diagonal"></div></div>';
     sem.maxmin.appendChild(tdMM);
 
-    sem.viento.appendChild(makeTd(String(Math.round(today.wind_speed_10m_max[i])), windColor(today.wind_speed_10m_max[i])));
-    sem.rafagas.appendChild(makeTd(String(Math.round(today.wind_gusts_10m_max[i])), gustColor(today.wind_gusts_10m_max[i])));
+    sem.viento.appendChild(makeTd(Math.round(today.wind_speed_10m_max[i]) + '<span class="u">km/h</span>', windColor(today.wind_speed_10m_max[i])));
+    sem.rafagas.appendChild(makeTd(Math.round(today.wind_gusts_10m_max[i]) + '<span class="u">km/h</span>', gustColor(today.wind_gusts_10m_max[i])));
 
     var nb = (today.cloud_cover_mean && today.cloud_cover_mean[i] != null) ? today.cloud_cover_mean[i] : 0;
-    sem.nubes.appendChild(makeTd(String(Math.round(nb)), cloudColor(nb)));
+    sem.nubes.appendChild(makeTd(Math.round(nb) + '<span class="u">%</span>', cloudColor(nb)));
 
     var ps = (today.precipitation_sum && today.precipitation_sum[i] != null) ? today.precipitation_sum[i] : 0;
-    sem.mm.appendChild(makeTd(ps < 0.1 ? '0' : ps.toFixed(1), rainMmColor(ps)));
+    sem.mm.appendChild(makeTd((ps < 0.1 ? '0' : ps.toFixed(1)) + '<span class="u">mm</span>', rainMmColor(ps)));
 
     var pp = (today.precipitation_probability_max && today.precipitation_probability_max[i] != null) ? today.precipitation_probability_max[i] : 0;
-    sem.lluviapct.appendChild(makeTd(String(Math.round(pp)), rainPctColor(pp)));
+    sem.lluviapct.appendChild(makeTd(Math.round(pp) + '<span class="u">%</span>', rainPctColor(pp)));
   }
 
   // hora de los datos
