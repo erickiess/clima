@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=1280, initial-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Clima Neuquén</title>
-  <!-- v2.3 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades en cada valor · jerarquía visual -->
+  <!-- v2.4 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades · reloj gigante, sol movido a HOY -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -45,14 +45,16 @@
     /* Reloj */
     .card-clock { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: center; justify-content: center; }
     .card-clock .city { font-size: 12px; color: #9aa0a6; letter-spacing: 1px; }
-    .card-clock .time { font-size: 54px; font-weight: 500; line-height: 1; color: #fff; margin-top: 3px; letter-spacing: 1px; }
-    .card-clock .time .sec { font-size: 24px; color: #9aa0a6; font-weight: 400; }
-    .card-clock .date { font-size: 13px; color: #c5c9ce; margin-top: 5px; }
+    .card-clock .time { font-size: 76px; font-weight: 500; line-height: 1; color: #fff; margin-top: 3px; letter-spacing: 1px; }
+    .card-clock .time .sec { font-size: 28px; color: #9aa0a6; font-weight: 400; }
+    .card-clock .date { font-size: 13px; color: #c5c9ce; margin-top: 6px; }
 
     /* unidad de medida: chica y atenuada al lado de cada número */
     .u { font-size: 10px; color: rgba(255,255,255,0.55); margin-left: 2px; font-weight: 400; }
     .row-label .u { color: #6a7180; margin-left: 4px; }
-    .sun-bar { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; margin-top: 6px; font-size: 10px; }
+    .sun-bar { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; font-size: 12px; }
+    .hoy-header .sun-bar { width: 320px; }
+    .hoy-header .sun-bar .day-progress { margin: 0 4px; }
     .sun-rise { color: #f9ab00; margin-right: 6px; white-space: nowrap; }
     .sun-set { color: #ff6d00; margin-left: 6px; white-space: nowrap; }
     .day-progress {
@@ -362,16 +364,8 @@
 
     <div class="card card-clock">
       <div class="city">NEUQU&Eacute;N CAPITAL</div>
-      <div class="time" id="clock">--:--:--</div>
+      <div class="time" id="clock">--:--</div>
       <div class="date" id="date">&mdash;</div>
-      <div class="sun-bar">
-        <span class="sun-rise">&#9728; <span id="sunrise">--:--</span></span>
-        <div class="day-progress">
-          <div class="fill" id="dayFill" style="width:0%"></div>
-          <div class="dot" id="dayDot" style="left:0%"></div>
-        </div>
-        <span class="sun-set"><span id="sunset">--:--</span> &#9789;</span>
-      </div>
     </div>
 
     <div class="card card-temp">
@@ -429,6 +423,14 @@
   <div class="hoy-card">
     <div class="hoy-header">
       <div class="hoy-title">HOY &middot; POR HORA</div>
+      <div class="sun-bar">
+        <span class="sun-rise">&#9728; <span id="sunrise">--:--</span></span>
+        <div class="day-progress">
+          <div class="fill" id="dayFill" style="width:0%"></div>
+          <div class="dot" id="dayDot" style="left:0%"></div>
+        </div>
+        <span class="sun-set"><span id="sunset">--:--</span> &#9789;</span>
+      </div>
       <div class="hoy-sub" id="lastUpdate">&mdash;</div>
     </div>
     <table class="tabla-hoy">
