@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=1280, initial-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Clima Neuquén</title>
-  <!-- v2.4 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades · reloj gigante, sol movido a HOY -->
+  <!-- v2.5 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades · reloj gigante · divisor de día en tabla horaria -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -136,6 +136,9 @@
       background: rgba(249,171,0,0.25);
       font-weight: 500;
     }
+    /* línea divisoria: arranca un día nuevo en la tabla horaria */
+    .tabla-hoy .dia-sep { box-shadow: inset 4px 0 0 0 #ffb300; }
+    .tabla-hoy .dnuevo { color: #ffb300; font-weight: 600; margin-right: 2px; }
 
     /* 7 DÍAS */
     .semana-card {
@@ -675,23 +678,43 @@ function render(d) {
   var k;
   for (k in rows) clearRow(rows[k]);
 
+  var prevDay = -1;
   for (i = 0; i < 10; i++) {
     idx = startIdx + i * 3;
     if (idx >= h.time.length) break;
     var t = parseLocal(h.time[idx]);
+    // ¿arranca un día nuevo en esta columna? (cambió la fecha respecto a la anterior)
+    var sep = (prevDay !== -1 && t.getDate() !== prevDay);
+    prevDay = t.getDate();
 
-    var tdH = makeTd(pad(t.getHours()) + ' hs', null);
+    // en la fila Hora: si empieza un día nuevo, mostrar el nombre del día
+    var horaTxt = pad(t.getHours()) + ' hs';
+    if (sep) horaTxt = '<span class="dnuevo">' + DIAS_CORTOS[t.getDay()].toUpperCase() + '</span> ' + horaTxt;
+
+    var tdH = makeTd(horaTxt, null);
     if (i === 0) tdH.className = 'hora-now';
     else tdH.style.color = '#9aa0a6';
-    rows.hora.appendChild(tdH);
 
-    rows.temp.appendChild(makeTd(Math.round(h.temperature_2m[idx]) + '°', tempColor(h.temperature_2m[idx])));
-    rows.viento.appendChild(makeTd(Math.round(h.wind_speed_10m[idx]) + '<span class="u">km/h</span>', windColor(h.wind_speed_10m[idx])));
-    rows.rafagas.appendChild(makeTd(Math.round(h.wind_gusts_10m[idx]) + '<span class="u">km/h</span>', gustColor(h.wind_gusts_10m[idx])));
-    rows.nubes.appendChild(makeTd(Math.round(h.cloud_cover[idx]) + '<span class="u">%</span>', cloudColor(h.cloud_cover[idx])));
     var mm = h.precipitation[idx];
-    rows.mmh.appendChild(makeTd((mm < 0.1 ? '0' : mm.toFixed(1)) + '<span class="u">mm</span>', rainMmColor(mm)));
-    rows.lluviapct.appendChild(makeTd(Math.round(h.precipitation_probability[idx]) + '<span class="u">%</span>', rainPctColor(h.precipitation_probability[idx])));
+    var celdas = [
+      tdH,
+      makeTd(Math.round(h.temperature_2m[idx]) + '°', tempColor(h.temperature_2m[idx])),
+      makeTd(Math.round(h.wind_speed_10m[idx]) + '<span class="u">km/h</span>', windColor(h.wind_speed_10m[idx])),
+      makeTd(Math.round(h.wind_gusts_10m[idx]) + '<span class="u">km/h</span>', gustColor(h.wind_gusts_10m[idx])),
+      makeTd(Math.round(h.cloud_cover[idx]) + '<span class="u">%</span>', cloudColor(h.cloud_cover[idx])),
+      makeTd((mm < 0.1 ? '0' : mm.toFixed(1)) + '<span class="u">mm</span>', rainMmColor(mm)),
+      makeTd(Math.round(h.precipitation_probability[idx]) + '<span class="u">%</span>', rainPctColor(h.precipitation_probability[idx]))
+    ];
+    // línea divisoria vertical al arrancar el día nuevo (en toda la columna)
+    if (sep) { for (var cc = 0; cc < celdas.length; cc++) celdas[cc].className += ' dia-sep'; }
+
+    rows.hora.appendChild(celdas[0]);
+    rows.temp.appendChild(celdas[1]);
+    rows.viento.appendChild(celdas[2]);
+    rows.rafagas.appendChild(celdas[3]);
+    rows.nubes.appendChild(celdas[4]);
+    rows.mmh.appendChild(celdas[5]);
+    rows.lluviapct.appendChild(celdas[6]);
   }
 
   // -- 7 DÍAS --
