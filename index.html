@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=1280, initial-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Clima Neuquén</title>
-  <!-- v2.7 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades · reloj 104px · columnas iguales (table-layout fixed) · todo agrandado, márgenes al mínimo -->
+  <!-- v2.8 · datos pre-horneados por GitHub Actions · JS ES5 (Android 6) · íconos animados · hora corregida · unidades · columnas iguales (table-layout fixed) · DEPORTES: semáforo tenis/mtb/enduro/aviación con umbrales configurables (sport-config.js + panel ⚙) · datos con past_days=2 -->
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -44,10 +44,8 @@
 
     /* Reloj */
     .card-clock { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: center; justify-content: center; }
-    .card-clock .time { font-size: 90px; font-weight: 500; line-height: 1; color: #fff; letter-spacing: 1px; }
-    .card-clock .time .sec { font-size: 32px; color: #9aa0a6; font-weight: 400; }
-    .card-clock .date { font-size: 15px; color: #c5c9ce; margin-top: 6px; }
-    .card-clock .date .city { color: #9aa0a6; }
+    .card-clock .time { font-size: 88px; font-weight: 500; line-height: 1; color: #fff; letter-spacing: 2px; }
+    .card-clock .date { font-size: 18px; color: #c5c9ce; margin-top: 6px; }
 
     /* unidad de medida: chica y atenuada al lado de cada número */
     .u { font-size: 10px; color: rgba(255,255,255,0.55); margin-left: 2px; font-weight: 400; }
@@ -74,6 +72,7 @@
     }
 
     /* Temp principal */
+    .card-temp { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: center; justify-content: center; }
     .card-temp .row1 { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; }
     .card-temp .now { font-size: 74px; font-weight: 500; line-height: 0.9; color: #f9ab00; margin-right: 12px; }
     .card-temp .max { font-size: 28px; font-weight: 500; color: #ff6d00; line-height: 1; }
@@ -83,6 +82,7 @@
     .card-temp .feels { font-size: 13px; color: #9aa0a6; margin-left: 6px; }
 
     /* Viento */
+    .card-wind { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: space-between; justify-content: space-between; }
     .card-wind .label { font-size: 12px; color: #9aa0a6; letter-spacing: 0.5px; margin-bottom: 5px; }
     .card-wind .row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; }
     .card-wind .icon { font-size: 38px; margin-right: 10px; }
@@ -91,9 +91,10 @@
     .card-wind .gusts { margin-top: 8px; font-size: 15px; color: #ff6d00; font-weight: 500; }
 
     /* Stats grid */
-    .stats { padding: 8px; }
-    .stats .srow { display: -webkit-flex; display: flex; }
-    .stats .srow:first-child { margin-bottom: 5px; }
+    .stats { padding: 8px; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: space-between; justify-content: space-between; }
+    .stats .srow { display: -webkit-flex; display: flex; -webkit-flex: 1; flex: 1; }
+    .stats .srow:first-child { margin-bottom: 6px; }
+    .stats .stat-box { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-justify-content: center; justify-content: center; }
     .stat-box { background: #1a1f2e; border-radius: 5px; padding: 5px 7px; -webkit-flex: 1; flex: 1; margin-right: 5px; }
     .stat-box:last-child { margin-right: 0; }
     .stat-box .lbl { font-size: 12px; color: #9aa0a6; white-space: nowrap; }
@@ -125,7 +126,7 @@
       border-collapse: separate; border-spacing: 2px;
       font-size: 19px; text-align: center;
     }
-    .tabla-hoy td { padding: 4px; border-radius: 4px; }
+    .tabla-hoy td { padding: 3px; border-radius: 4px; }
     .tabla-hoy .row-label {
       text-align: left; color: #9aa0a6;
       padding: 4px 8px; font-size: 15px; width: 120px;
@@ -145,9 +146,9 @@
     .semana-card {
       background: #232838;
       border-radius: 8px;
-      padding: 6px 10px;
+      padding: 4px 10px;
     }
-    .semana-title { font-size: 14px; color: #fff; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 5px; }
+    .semana-title { font-size: 14px; color: #fff; letter-spacing: 0.5px; font-weight: 500; margin-bottom: 3px; }
 
     .tabla-semana {
       width: 100%;
@@ -155,7 +156,7 @@
       border-collapse: separate; border-spacing: 2px;
       font-size: 19px; text-align: center;
     }
-    .tabla-semana td { padding: 3px; border-radius: 3px; }
+    .tabla-semana td { padding: 2px; border-radius: 3px; }
     .tabla-semana .row-label {
       text-align: left; color: #9aa0a6;
       padding: 2px 6px; font-size: 15px; width: 120px;
@@ -170,7 +171,7 @@
     .tabla-semana .cond-cell { padding: 2px; background: none; font-size: 20px; }
 
     /* Celda diagonal max/min */
-    .maxmin-cell { padding: 0 !important; height: 46px; background: none !important; }
+    .maxmin-cell { padding: 0 !important; height: 40px; background: none !important; }
     .maxmin-box { position: relative; height: 100%; border-radius: 4px; overflow: hidden; }
     .maxmin-box .max-num {
       position: absolute; top: 0; left: 0;
@@ -341,6 +342,79 @@
     .card-wind .icon { -webkit-animation: soplar 2.2s ease-in-out infinite; animation: soplar 2.2s ease-in-out infinite; }
     .day-progress .dot { -webkit-animation: latido 3s ease-in-out infinite; animation: latido 3s ease-in-out infinite; }
 
+    /* ============ DEPORTES ============ */
+    .card-sports {
+      -webkit-flex: 0.8; flex: 0.8;
+      display: -webkit-flex; display: flex;
+      -webkit-flex-direction: column; flex-direction: column;
+    }
+    .card-sports .label { font-size: 12px; color: #9aa0a6; letter-spacing: 0.5px; margin-bottom: 5px; }
+    .sports-now {
+      -webkit-flex: 1; flex: 1;
+      display: -webkit-flex; display: flex;
+      -webkit-justify-content: space-around; justify-content: space-around;
+      -webkit-align-items: center; align-items: center;
+    }
+    .sp {
+      display: inline-block; line-height: 1;
+      padding: 2px 3px 4px 3px;
+      border-bottom: 3px solid transparent;
+      border-radius: 2px;
+    }
+    .sp-ok  { border-bottom-color: #66bb6a; }
+    .sp-mid { border-bottom-color: #ffd740; }
+    .sp-no  { opacity: 0.16; }
+    .tabla-hoy .sp, .tabla-semana .sp {
+      margin: 0; padding: 0 1px 1px 1px; border-bottom-width: 2px;
+    }
+    .tabla-hoy .sports-cell, .tabla-semana .sports-cell { padding: 2px; }
+
+    /* logos de deportes dibujados en SVG (mismo aspecto en cualquier pantalla) */
+    .spi { display: inline-block; vertical-align: middle; height: 26px; width: 26px; }
+    .sports-now .spi { height: 42px; width: 42px; }
+    .tabla-hoy .spi, .tabla-semana .spi { height: 18px; width: 18px; }
+    .cfg-sport h3 .spi { height: 19px; width: 19px; vertical-align: -4px; margin-right: 2px; }
+    .sports-cell { background: #1a1f2e; }
+
+    /* Botón engranaje (config) */
+    .gear-btn {
+      position: fixed; right: 8px; bottom: 8px; z-index: 500;
+      width: 36px; height: 36px; line-height: 36px;
+      text-align: center; font-size: 19px;
+      color: #6a7180; background: rgba(35,40,56,0.85);
+      border-radius: 50%;
+    }
+
+    /* Panel de configuración */
+    .cfg-overlay {
+      position: fixed; left: 0; top: 0; right: 0; bottom: 0;
+      background: rgba(15,20,25,0.97); z-index: 900;
+      overflow-y: auto; padding: 12px 14px;
+    }
+    .cfg-title { font-size: 19px; color: #fff; font-weight: 500; margin-bottom: 3px; }
+    .cfg-sub { font-size: 12px; color: #9aa0a6; margin-bottom: 10px; }
+    .cfg-cols { display: -webkit-flex; display: flex; }
+    .cfg-sport {
+      -webkit-flex: 1; flex: 1;
+      background: #232838; border-radius: 8px;
+      padding: 10px; margin-right: 8px;
+    }
+    .cfg-sport:last-child { margin-right: 0; }
+    .cfg-sport h3 { font-size: 15px; color: #fff; margin-bottom: 8px; font-weight: 500; }
+    .cfg-row { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; margin-bottom: 6px; }
+    .cfg-row .cfg-lbl { -webkit-flex: 1; flex: 1; font-size: 11px; color: #9aa0a6; padding-right: 4px; }
+    .cfg-btn {
+      width: 38px; height: 38px; line-height: 38px; text-align: center;
+      background: #2d3340; color: #fff; font-size: 20px; border-radius: 6px;
+    }
+    .cfg-val { width: 52px; text-align: center; font-size: 16px; color: #f9ab00; font-weight: 500; }
+    .cfg-actions { margin-top: 12px; text-align: center; }
+    .cfg-actions span {
+      display: inline-block; padding: 11px 24px; margin: 0 6px;
+      border-radius: 6px; font-size: 15px; background: #2d3340; color: #fff;
+    }
+    .cfg-actions .cfg-save { background: #f9ab00; color: #1a1f2e; font-weight: 600; }
+
     /* Aviso sin datos */
     .nodata {
       position: fixed; left: 0; top: 0; right: 0; bottom: 0;
@@ -369,7 +443,7 @@
 
     <div class="card card-clock">
       <div class="time" id="clock">--:--</div>
-      <div class="date"><span id="date">&mdash;</span> &middot; <span class="city">NEUQU&Eacute;N</span></div>
+      <div class="date"><span id="date">&mdash;</span></div>
     </div>
 
     <div class="card card-temp">
@@ -397,6 +471,11 @@
         </div>
       </div>
       <div class="gusts">R&aacute;fagas <span id="windGusts">--</span> km/h</div>
+    </div>
+
+    <div class="card card-sports">
+      <div class="label">DEPORTES AHORA</div>
+      <div class="sports-now" id="sportsNow">&mdash;</div>
     </div>
 
     <div class="card stats">
@@ -446,6 +525,7 @@
         <tr id="row-nubes"><td class="row-label"><span class="emo">&#9729;&#65039;</span>Nubes</td></tr>
         <tr id="row-mmh"><td class="row-label"><span class="emo">&#128167;</span>mm/h</td></tr>
         <tr id="row-lluviapct"><td class="row-label"><span class="emo">&#9748;</span>Lluvia %</td></tr>
+        <tr id="row-deportes"><td class="row-label"><span class="emo">&#127934;</span>Deportes</td></tr>
       </tbody>
     </table>
   </div>
@@ -463,11 +543,16 @@
         <tr id="sem-nubes"><td class="row-label"><span class="emo">&#9729;&#65039;</span>Nubes</td></tr>
         <tr id="sem-mm"><td class="row-label"><span class="emo">&#128167;</span>mm total</td></tr>
         <tr id="sem-lluviapct"><td class="row-label"><span class="emo">&#9748;</span>Lluvia %</td></tr>
+        <tr id="sem-deportes"><td class="row-label"><span class="emo">&#127934;</span>Deportes</td></tr>
       </tbody>
     </table>
   </div>
 
 </div>
+
+<!-- Config de deportes -->
+<div class="gear-btn" onclick="cfgOpen()">&#9881;</div>
+<div class="cfg-overlay hidden" id="cfgOverlay"></div>
 
 <script>
 // Muestra cualquier error de JS en pantalla (para debug en la tablet)
@@ -484,7 +569,8 @@ window.onerror = function(msg, src, line, col) {
 </script>
 
 <script>
-// Carga data.js con cache-buster para que GitHub Pages no sirva datos viejos
+// Carga config de deportes y data.js con cache-buster para que GitHub Pages no sirva datos viejos
+document.write('<scr' + 'ipt src="sport-config.js?v=' + new Date().getTime() + '"></scr' + 'ipt>');
 document.write('<scr' + 'ipt src="data.js?v=' + new Date().getTime() + '"></scr' + 'ipt>');
 </script>
 
@@ -583,6 +669,160 @@ function rainMmColor(v) {
   return '#5a8fc2';
 }
 
+// ============================================
+// DEPORTES — semáforo por hora y por día
+// 2 = ✅ se puede · 1 = ⚠️ justo · 0 = ❌ no
+// ============================================
+var SPORT_KEYS = ['tenis', 'mtb', 'enduro', 'avion'];
+// Íconos de Font Awesome Free 6 (CC BY 4.0) normalizados a un lienzo 24x24.
+// La pelota de tenis es dibujo propio. Todos incrustados (sin pedidos externos).
+var SPORT_ICON = {
+  // 🎾 pelota de tenis (dibujo propio)
+  tenis: '<svg class="spi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#c9dd3f"/><path d="M4.6 5.2 Q11 12 4.6 18.8" fill="none" stroke="#fbfde8" stroke-width="1.5"/><path d="M19.4 5.2 Q13 12 19.4 18.8" fill="none" stroke="#fbfde8" stroke-width="1.5"/></svg>',
+  // 🚲 bicicleta (FA bicycle, 640x512)
+  mtb: '<svg class="spi" viewBox="0 0 24 24"><g transform="translate(0 2.4) scale(0.0375)" fill="#e8eaed"><path d="M312 32c-13.3 0-24 10.7-24 24s10.7 24 24 24h25.7l34.6 64H222.9l-27.4-38c-4.5-6.3-11.8-10-19.5-10h-56c-13.3 0-24 10.7-24 24s10.7 24 24 24h43.7l22.1 30.7l-26.6 53.1c-10-2.5-20.5-3.8-31.2-3.8C57.3 224 0 281.3 0 352s57.3 128 128 128c65.3 0 119.1-48.9 127-112h49c8.5 0 16.3-4.5 20.7-11.8l84.8-143.5l21.7 40.1C402.4 276.3 384 312 384 352c0 70.7 57.3 128 128 128s128-57.3 128-128s-57.3-128-128-128c-13.5 0-26.5 2.1-38.7 6L375.4 48.8C369.8 38.4 359 32 347.2 32zm146.6 271.7l32.3 59.7c6.3 11.7 20.9 16 32.5 9.7s16-20.9 9.7-32.5l-32.3-59.7c3.6-.6 7.4-.9 11.2-.9c39.8 0 72 32.2 72 72s-32.2 72-72 72s-72-32.2-72-72c0-18.6 7-35.5 18.6-48.3M133.2 368h65c-7.3 32.1-36 56-70.2 56c-39.8 0-72-32.2-72-72s32.2-72 72-72c1.7 0 3.4.1 5.1.2l-24.2 48.5c-9 18.1 4.1 39.4 24.3 39.4zm33.7-48l50.7-101.3l72.9 101.2l-.1.1zm90.6-128H366l-49 82.8l-59.6-82.8z"/></g></svg>',
+  // 🏍 moto (FA motorcycle, 640x512)
+  enduro: '<svg class="spi" viewBox="0 0 24 24"><g transform="translate(0 2.4) scale(0.0375)" fill="#e8eaed"><path d="M280 32c-13.3 0-24 10.7-24 24s10.7 24 24 24h57.7l16.4 30.3L256 192l-45.3-45.3c-12-12-28.3-18.7-45.3-18.7H64c-17.7 0-32 14.3-32 32v32h96c88.4 0 160 71.6 160 160c0 11-1.1 21.7-3.2 32h70.4c-2.1-10.3-3.2-21-3.2-32c0-52.2 25-98.6 63.7-127.8l15.4 28.6C402.4 276.3 384 312 384 352c0 70.7 57.3 128 128 128s128-57.3 128-128s-57.3-128-128-128c-13.5 0-26.5 2.1-38.7 6l-55.1-102H480c17.7 0 32-14.3 32-32V64c0-17.7-14.3-32-32-32h-20.4c-7.5 0-14.7 2.6-20.5 7.4l-47.4 39.5l-14-26c-7-12.9-20.5-21-35.2-21zm182.7 279.2l28.2 52.2c6.3 11.7 20.9 16 32.5 9.7s16-20.9 9.7-32.5l-28.2-52.2c2.3-.3 4.7-.4 7.1-.4c35.3 0 64 28.7 64 64s-28.7 64-64 64s-64-28.7-64-64c0-15.5 5.5-29.7 14.7-40.8M187.3 376c-9.5 23.5-32.5 40-59.3 40c-35.3 0-64-28.7-64-64s28.7-64 64-64c26.9 0 49.9 16.5 59.3 40h66.4c-11.2-59.2-63.2-104-125.7-104C57.3 224 0 281.3 0 352s57.3 128 128 128c62.5 0 114.5-44.8 125.8-104h-66.4zm-59.3 8a32 32 0 1 0 0-64a32 32 0 1 0 0 64"/></g></svg>',
+  // ✈ avión (FA plane, 576x512)
+  avion: '<svg class="spi" viewBox="0 0 24 24"><g transform="translate(0 1.33) scale(0.041667)" fill="#e8eaed"><path d="M482.3 192c34.2 0 93.7 29 93.7 64c0 36-59.5 64-93.7 64H365.7L265.2 495.9c-5.7 10-16.3 16.1-27.8 16.1h-56.2c-10.6 0-18.3-10.2-15.4-20.4l49-171.6H112l-43.2 57.6c-3 4-7.8 6.4-12.8 6.4H14c-7.8 0-14-6.3-14-14c0-1.3.2-2.6.5-3.9L32 256L.5 145.9c-.4-1.3-.5-2.6-.5-3.9c0-7.8 6.3-14 14-14h42c5 0 9.8 2.4 12.8 6.4L112 192h102.9l-49-171.6c-3-10.2 4.7-20.4 15.3-20.4h56.2c11.5 0 22.1 6.2 27.8 16.1L365.7 192z"/></g></svg>'
+};
+var CFG_STORE_KEY = 'SPORT_CONFIG_V1';
+
+// defaults del repo (sport-config.js) pisados por lo guardado en la tablet
+function getSportConfig() {
+  var base = window.SPORT_CONFIG_DEFAULTS || {};
+  var cfg = {}, s, k;
+  for (s in base) { cfg[s] = {}; for (k in base[s]) cfg[s][k] = base[s][k]; }
+  try {
+    var raw = localStorage.getItem(CFG_STORE_KEY);
+    if (raw) {
+      var ov = JSON.parse(raw);
+      for (s in ov) { if (cfg[s]) { for (k in ov[s]) { if (typeof ov[s][k] === 'number') cfg[s][k] = ov[s][k]; } } }
+    }
+  } catch (e) {}
+  return cfg;
+}
+var SPORT_CFG = getSportConfig();
+
+// v <= ok → verde; hasta un 35% más → amarillo; después rojo
+function limMax(v, ok) { if (v <= ok) return 2; if (v <= ok * 1.35) return 1; return 0; }
+function limMin(v, ok, marg) { if (v >= ok) return 2; if (v >= marg) return 1; return 0; }
+
+// lluvia acumulada en las `horas` previas a idx (sin incluir idx)
+function sumPrecipPrev(h, idx, horas) {
+  var s = 0, j;
+  for (j = idx - horas; j < idx; j++) { if (j >= 0 && h.precipitation[j] != null) s += h.precipitation[j]; }
+  return s;
+}
+
+function horaCtx(d, idx) {
+  var h = d.hourly;
+  return {
+    temp: h.temperature_2m[idx],
+    viento: h.wind_speed_10m[idx],
+    rafagas: h.wind_gusts_10m[idx],
+    mm: h.precipitation[idx] || 0,
+    prob: h.precipitation_probability ? h.precipitation_probability[idx] : 0,
+    nubesBajas: h.cloud_cover_low ? h.cloud_cover_low[idx] : null,
+    visKm: h.visibility ? h.visibility[idx] / 1000 : null,
+    mm3h: sumPrecipPrev(h, idx, 3) + (h.precipitation[idx] || 0),
+    mm24h: sumPrecipPrev(h, idx, 24)
+  };
+}
+
+function evalSport(sport, ctx, cfg) {
+  var c = cfg[sport];
+  if (!c) return 0;
+  var r = 2;
+  function m(x) { if (x < r) r = x; }
+  if (sport === 'tenis') {
+    m(limMax(ctx.rafagas, c.rafagasMax));
+    m(limMax(ctx.mm3h, c.lluvia3hMax));
+    m(limMax(ctx.prob, c.probLluviaMax));
+    m(ctx.mm < 0.1 ? 2 : (ctx.mm < 0.3 ? 1 : 0));
+    m(limMin(ctx.temp, c.tempMin, c.tempMin - 4));
+    m(limMax(ctx.temp, c.tempMax));
+  } else if (sport === 'mtb') {
+    m(limMax(ctx.rafagas, c.rafagasMax));
+    m(limMax(ctx.mm24h, c.lluvia24hMax));
+    m(limMax(ctx.prob, c.probLluviaMax));
+    m(ctx.mm < 0.3 ? 2 : (ctx.mm < 1 ? 1 : 0));
+    m(limMin(ctx.temp, c.tempMin, c.tempMin - 4));
+  } else if (sport === 'enduro') {
+    m(limMax(ctx.rafagas, c.rafagasMax));
+    m(limMax(ctx.mm, c.lluviaHoraMax));
+    m(limMax(ctx.mm24h, c.lluvia24hMax));
+    m(limMin(ctx.temp, c.tempMin, c.tempMin - 4));
+  } else if (sport === 'avion') {
+    m(limMax(ctx.viento, c.vientoMax));
+    m(limMax(ctx.rafagas, c.rafagasMax));
+    m(limMax(ctx.prob, c.probLluviaMax));
+    m(ctx.mm < 0.1 ? 2 : 0);
+    if (ctx.nubesBajas != null) m(limMax(ctx.nubesBajas, c.nubesBajasMax));
+    if (ctx.visKm != null) m(limMin(ctx.visKm, c.visMinKm, c.visMinKm * 0.6));
+  }
+  return r;
+}
+
+// mapa fecha "YYYY-MM-DD" → índice en daily (con past_days el [0] ya no es hoy)
+function buildDayIndex(d) {
+  var map = {}, i;
+  for (i = 0; i < d.daily.time.length; i++) map[d.daily.time[i]] = i;
+  return map;
+}
+
+function esDeDia(d, dayMap, timeStr) {
+  var di = dayMap[timeStr.slice(0, 10)];
+  if (di == null) return true;
+  var t = parseLocal(timeStr);
+  return t >= parseLocal(d.daily.sunrise[di]) && t < parseLocal(d.daily.sunset[di]);
+}
+
+// estado de los 4 deportes en una hora puntual
+function sportsAt(d, dayMap, idx) {
+  var res = {}, i, s;
+  var ctx = horaCtx(d, idx);
+  var dia = esDeDia(d, dayMap, d.hourly.time[idx]);
+  for (i = 0; i < SPORT_KEYS.length; i++) {
+    s = SPORT_KEYS[i];
+    res[s] = dia ? evalSport(s, ctx, SPORT_CFG) : 0;
+  }
+  return res;
+}
+
+// estado por día: verde si hay 2+ horas diurnas verdes; amarillo si hay 2+ verdes/amarillas
+function sportsDay(d, dayMap, di) {
+  var dateStr = d.daily.time[di];
+  var h = d.hourly, counts = {}, i, j, s, stmap;
+  for (i = 0; i < SPORT_KEYS.length; i++) counts[SPORT_KEYS[i]] = { ok: 0, mid: 0 };
+  for (i = 0; i < h.time.length; i++) {
+    if (h.time[i].slice(0, 10) !== dateStr) continue;
+    if (!esDeDia(d, dayMap, h.time[i])) continue;
+    stmap = sportsAt(d, dayMap, i);
+    for (j = 0; j < SPORT_KEYS.length; j++) {
+      s = SPORT_KEYS[j];
+      if (stmap[s] === 2) counts[s].ok++;
+      else if (stmap[s] === 1) counts[s].mid++;
+    }
+  }
+  var res = {};
+  for (i = 0; i < SPORT_KEYS.length; i++) {
+    s = SPORT_KEYS[i];
+    res[s] = counts[s].ok >= 2 ? 2 : (counts[s].ok + counts[s].mid >= 2 ? 1 : 0);
+  }
+  return res;
+}
+
+function sportsHtml(stmap) {
+  var out = '', i, s, cls;
+  for (i = 0; i < SPORT_KEYS.length; i++) {
+    s = SPORT_KEYS[i];
+    cls = stmap[s] === 2 ? 'sp-ok' : (stmap[s] === 1 ? 'sp-mid' : 'sp-no');
+    out += '<span class="sp ' + cls + '">' + SPORT_ICON[s] + '</span>';
+  }
+  return out;
+}
+
 // Parsea "2026-07-17T08:31" como hora LOCAL (evita bugs de zona horaria del parser viejo)
 function parseLocal(s) {
   var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(s);
@@ -602,9 +842,9 @@ function ahora() { return new Date(new Date().getTime() + TZ_DELTA); }
 // ---- RELOJ ----
 function tick() {
   var n = ahora();
-  document.getElementById('clock').innerHTML = pad(n.getHours()) + ':' + pad(n.getMinutes()) + '<span class="sec">:' + pad(n.getSeconds()) + '</span>';
+  document.getElementById('clock').innerHTML = pad(n.getHours()) + ':' + pad(n.getMinutes());
   document.getElementById('date').innerHTML =
-    DIAS[n.getDay()] + ' ' + n.getDate() + ' de ' + MESES[n.getMonth()];
+    DIAS[n.getDay()] + ' ' + pad(n.getDate()) + '/' + pad(n.getMonth() + 1) + '/' + n.getFullYear();
 }
 tick();
 setInterval(tick, 1000);
@@ -639,10 +879,17 @@ function render(d) {
   var today = d.daily;
   var cond = wmoToCondition(c.weather_code);
 
+  // con past_days los primeros índices son días pasados: ubicar "hoy"
+  var dayMap = buildDayIndex(d);
+  var nAh = ahora();
+  var hoyStr = nAh.getFullYear() + '-' + pad(nAh.getMonth() + 1) + '-' + pad(nAh.getDate());
+  var dIdx0 = dayMap[hoyStr];
+  if (dIdx0 == null) dIdx0 = today.time.length > 7 ? 2 : 0;
+
   document.getElementById('tempNow').innerHTML = Math.round(c.temperature_2m) + '°';
   document.getElementById('tempNow').style.color = tempColor(c.temperature_2m);
-  document.getElementById('tempMax').innerHTML = Math.round(today.temperature_2m_max[0]) + '°';
-  document.getElementById('tempMin').innerHTML = Math.round(today.temperature_2m_min[0]) + '°';
+  document.getElementById('tempMax').innerHTML = Math.round(today.temperature_2m_max[dIdx0]) + '°';
+  document.getElementById('tempMin').innerHTML = Math.round(today.temperature_2m_min[dIdx0]) + '°';
   document.getElementById('tempFeels').innerHTML = Math.round(c.apparent_temperature) + '°';
   document.getElementById('condText').innerHTML = cond.text;
 
@@ -655,11 +902,19 @@ function render(d) {
   document.getElementById('rainNow').innerHTML = c.precipitation < 1 ? c.precipitation.toFixed(1) : Math.round(c.precipitation);
   document.getElementById('pressure').innerHTML = Math.round(c.pressure_msl);
 
-  updateSunProgress(today.sunrise[0], today.sunset[0]);
+  updateSunProgress(today.sunrise[dIdx0], today.sunset[dIdx0]);
 
   // -- HOY POR HORA --
   var now = ahora();
   var h = d.hourly;
+
+  // -- DEPORTES AHORA (header) --
+  var curIdx = 0, ci;
+  for (ci = 0; ci < h.time.length; ci++) {
+    if (parseLocal(h.time[ci]) <= now) curIdx = ci; else break;
+  }
+  document.getElementById('sportsNow').innerHTML = sportsHtml(sportsAt(d, dayMap, curIdx));
+
   var startIdx = -1;
   var i, idx;
   for (i = 0; i < h.time.length; i++) {
@@ -674,7 +929,8 @@ function render(d) {
     rafagas: document.getElementById('row-rafagas'),
     nubes: document.getElementById('row-nubes'),
     mmh: document.getElementById('row-mmh'),
-    lluviapct: document.getElementById('row-lluviapct')
+    lluviapct: document.getElementById('row-lluviapct'),
+    deportes: document.getElementById('row-deportes')
   };
   var k;
   for (k in rows) clearRow(rows[k]);
@@ -706,6 +962,9 @@ function render(d) {
       makeTd((mm < 0.1 ? '0' : mm.toFixed(1)) + '<span class="u">mm</span>', rainMmColor(mm)),
       makeTd(Math.round(h.precipitation_probability[idx]) + '<span class="u">%</span>', rainPctColor(h.precipitation_probability[idx]))
     ];
+    var tdSp = makeTd(sportsHtml(sportsAt(d, dayMap, idx)), null);
+    tdSp.className = 'sports-cell';
+    celdas.push(tdSp);
     // línea divisoria vertical al arrancar el día nuevo (en toda la columna)
     if (sep) { for (var cc = 0; cc < celdas.length; cc++) celdas[cc].className += ' dia-sep'; }
 
@@ -716,6 +975,7 @@ function render(d) {
     rows.nubes.appendChild(celdas[4]);
     rows.mmh.appendChild(celdas[5]);
     rows.lluviapct.appendChild(celdas[6]);
+    rows.deportes.appendChild(celdas[7]);
   }
 
   // -- 7 DÍAS --
@@ -727,12 +987,15 @@ function render(d) {
     rafagas: document.getElementById('sem-rafagas'),
     nubes: document.getElementById('sem-nubes'),
     mm: document.getElementById('sem-mm'),
-    lluviapct: document.getElementById('sem-lluviapct')
+    lluviapct: document.getElementById('sem-lluviapct'),
+    deportes: document.getElementById('sem-deportes')
   };
   for (k in sem) clearRow(sem[k]);
 
-  for (i = 0; i < 7 && i < today.time.length; i++) {
-    var dt = parseLocal(today.time[i] + 'T12:00');
+  for (i = 0; i < 7; i++) {
+    var di = dIdx0 + i;
+    if (di >= today.time.length) break;
+    var dt = parseLocal(today.time[di] + 'T12:00');
     var isToday = i === 0;
 
     var tdD = makeTd(isToday ? 'Hoy ' + DIAS_CORTOS[dt.getDay()] : DIAS_CORTOS[dt.getDay()] + ' ' + dt.getDate(), null);
@@ -740,14 +1003,14 @@ function render(d) {
     else tdD.style.color = '#9aa0a6';
     sem.dia.appendChild(tdD);
 
-    var w = wmoToCondition(today.weather_code[i]);
+    var w = wmoToCondition(today.weather_code[di]);
     var tdC = document.createElement('td');
     tdC.className = 'cond-cell';
     tdC.innerHTML = iconHtml(w.cls, true);
     sem.cond.appendChild(tdC);
 
-    var mx = today.temperature_2m_max[i];
-    var mn = today.temperature_2m_min[i];
+    var mx = today.temperature_2m_max[di];
+    var mn = today.temperature_2m_min[di];
     var tdMM = document.createElement('td');
     tdMM.className = 'maxmin-cell';
     tdMM.innerHTML =
@@ -759,17 +1022,21 @@ function render(d) {
       '<div class="diagonal"></div></div>';
     sem.maxmin.appendChild(tdMM);
 
-    sem.viento.appendChild(makeTd(Math.round(today.wind_speed_10m_max[i]) + '<span class="u">km/h</span>', windColor(today.wind_speed_10m_max[i])));
-    sem.rafagas.appendChild(makeTd(Math.round(today.wind_gusts_10m_max[i]) + '<span class="u">km/h</span>', gustColor(today.wind_gusts_10m_max[i])));
+    sem.viento.appendChild(makeTd(Math.round(today.wind_speed_10m_max[di]) + '<span class="u">km/h</span>', windColor(today.wind_speed_10m_max[di])));
+    sem.rafagas.appendChild(makeTd(Math.round(today.wind_gusts_10m_max[di]) + '<span class="u">km/h</span>', gustColor(today.wind_gusts_10m_max[di])));
 
-    var nb = (today.cloud_cover_mean && today.cloud_cover_mean[i] != null) ? today.cloud_cover_mean[i] : 0;
+    var nb = (today.cloud_cover_mean && today.cloud_cover_mean[di] != null) ? today.cloud_cover_mean[di] : 0;
     sem.nubes.appendChild(makeTd(Math.round(nb) + '<span class="u">%</span>', cloudColor(nb)));
 
-    var ps = (today.precipitation_sum && today.precipitation_sum[i] != null) ? today.precipitation_sum[i] : 0;
+    var ps = (today.precipitation_sum && today.precipitation_sum[di] != null) ? today.precipitation_sum[di] : 0;
     sem.mm.appendChild(makeTd((ps < 0.1 ? '0' : ps.toFixed(1)) + '<span class="u">mm</span>', rainMmColor(ps)));
 
-    var pp = (today.precipitation_probability_max && today.precipitation_probability_max[i] != null) ? today.precipitation_probability_max[i] : 0;
+    var pp = (today.precipitation_probability_max && today.precipitation_probability_max[di] != null) ? today.precipitation_probability_max[di] : 0;
     sem.lluviapct.appendChild(makeTd(Math.round(pp) + '<span class="u">%</span>', rainPctColor(pp)));
+
+    var tdSem = makeTd(sportsHtml(sportsDay(d, dayMap, di)), null);
+    tdSem.className = 'sports-cell';
+    sem.deportes.appendChild(tdSem);
   }
 
   // hora de los datos
@@ -779,6 +1046,116 @@ function render(d) {
     upd = 'Datos de ' + pad(ut.getHours()) + ':' + pad(ut.getMinutes());
   }
   document.getElementById('lastUpdate').innerHTML = upd;
+}
+
+// ============================================
+// PANEL DE CONFIGURACIÓN DE DEPORTES (⚙)
+// ============================================
+// [clave, etiqueta, unidad, paso]
+var CFG_FIELDS = {
+  tenis: [
+    ['rafagasMax', 'Ráfagas máx', 'km/h', 1],
+    ['lluvia3hMax', 'Lluvia previa 3 h', 'mm', 0.5],
+    ['probLluviaMax', 'Prob. lluvia máx', '%', 5],
+    ['tempMin', 'Temp mín', '°C', 1],
+    ['tempMax', 'Temp máx', '°C', 1]
+  ],
+  mtb: [
+    ['rafagasMax', 'Ráfagas máx', 'km/h', 1],
+    ['lluvia24hMax', 'Lluvia 24 h (barro)', 'mm', 1],
+    ['probLluviaMax', 'Prob. lluvia máx', '%', 5],
+    ['tempMin', 'Temp mín', '°C', 1]
+  ],
+  enduro: [
+    ['rafagasMax', 'Ráfagas máx', 'km/h', 1],
+    ['lluviaHoraMax', 'Lluvia en la hora', 'mm', 0.5],
+    ['lluvia24hMax', 'Lluvia 24 h máx', 'mm', 1],
+    ['tempMin', 'Temp mín', '°C', 1]
+  ],
+  avion: [
+    ['vientoMax', 'Viento máx', 'km/h', 1],
+    ['rafagasMax', 'Ráfagas máx', 'km/h', 1],
+    ['nubesBajasMax', 'Nubes bajas máx', '%', 5],
+    ['visMinKm', 'Visibilidad mín', 'km', 1],
+    ['probLluviaMax', 'Prob. lluvia máx', '%', 5]
+  ]
+};
+var CFG_TITLES = {
+  tenis: SPORT_ICON.tenis + ' Tenis',
+  mtb: SPORT_ICON.mtb + ' MTB',
+  enduro: SPORT_ICON.enduro + ' Enduro',
+  avion: SPORT_ICON.avion + ' Aviaci&oacute;n'
+};
+
+var cfgTmp = null;
+
+function cfgOpen() {
+  cfgTmp = {};
+  var s, k, i;
+  for (s in SPORT_CFG) { cfgTmp[s] = {}; for (k in SPORT_CFG[s]) cfgTmp[s][k] = SPORT_CFG[s][k]; }
+
+  var html = '<div class="cfg-title">&#9881; Umbrales de deportes</div>'
+    + '<div class="cfg-sub">L&iacute;mite para que d&eacute; verde &#10003; &middot; hasta un 35% m&aacute;s queda amarillo &middot; despu&eacute;s se apaga. Se guarda en esta tablet; los valores de f&aacute;brica viven en sport-config.js del repo.</div>'
+    + '<div class="cfg-cols">';
+  var sk;
+  for (i = 0; i < SPORT_KEYS.length; i++) {
+    sk = SPORT_KEYS[i];
+    html += '<div class="cfg-sport"><h3>' + CFG_TITLES[sk] + '</h3>';
+    var fields = CFG_FIELDS[sk] || [];
+    for (var f = 0; f < fields.length; f++) {
+      var key = fields[f][0];
+      html += '<div class="cfg-row">'
+        + '<div class="cfg-lbl">' + fields[f][1] + ' <span class="u">' + fields[f][2] + '</span></div>'
+        + '<span class="cfg-btn" onclick="cfgAdj(\'' + sk + '\',\'' + key + '\',-1)">&minus;</span>'
+        + '<span class="cfg-val" id="cfgv-' + sk + '-' + key + '">' + cfgTmp[sk][key] + '</span>'
+        + '<span class="cfg-btn" onclick="cfgAdj(\'' + sk + '\',\'' + key + '\',1)">+</span>'
+        + '</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>'
+    + '<div class="cfg-actions">'
+    + '<span class="cfg-save" onclick="cfgSave()">Guardar</span>'
+    + '<span onclick="cfgReset()">Valores de f&aacute;brica</span>'
+    + '<span onclick="cfgClose()">Cancelar</span>'
+    + '</div>';
+
+  var ov = document.getElementById('cfgOverlay');
+  ov.innerHTML = html;
+  ov.className = 'cfg-overlay';
+}
+
+function cfgStep(sport, key) {
+  var fields = CFG_FIELDS[sport] || [], f;
+  for (f = 0; f < fields.length; f++) { if (fields[f][0] === key) return fields[f][3]; }
+  return 1;
+}
+
+function cfgAdj(sport, key, dir) {
+  var v = cfgTmp[sport][key] + dir * cfgStep(sport, key);
+  // temp mín puede ser negativa; el resto no baja de 0
+  if (v < 0 && key !== 'tempMin') v = 0;
+  v = Math.round(v * 10) / 10;
+  cfgTmp[sport][key] = v;
+  document.getElementById('cfgv-' + sport + '-' + key).innerHTML = v;
+}
+
+function cfgSave() {
+  try { localStorage.setItem(CFG_STORE_KEY, JSON.stringify(cfgTmp)); } catch (e) {}
+  SPORT_CFG = cfgTmp;
+  cfgClose();
+  if (window.CLIMA_DATA && window.CLIMA_DATA.current) render(window.CLIMA_DATA);
+}
+
+function cfgReset() {
+  try { localStorage.removeItem(CFG_STORE_KEY); } catch (e) {}
+  SPORT_CFG = getSportConfig();
+  cfgClose();
+  if (window.CLIMA_DATA && window.CLIMA_DATA.current) render(window.CLIMA_DATA);
+}
+
+function cfgClose() {
+  document.getElementById('cfgOverlay').className = 'cfg-overlay hidden';
 }
 
 // ---- ARRANQUE ----
