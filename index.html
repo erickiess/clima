@@ -738,6 +738,7 @@ function evalSport(sport, ctx, cfg) {
   if (sport === 'tenis') {
     m(limMax(ctx.rafagas, c.rafagasMax));
     m(limMax(ctx.mm3h, c.lluvia3hMax));
+    if (c.lluvia24hMax != null) m(limMax(ctx.mm24h, c.lluvia24hMax));
     m(limMax(ctx.prob, c.probLluviaMax));
     m(ctx.mm < 0.1 ? 2 : (ctx.mm < 0.3 ? 1 : 0));
     m(limMin(ctx.temp, c.tempMin, c.tempMin - 4));
@@ -1056,6 +1057,7 @@ var CFG_FIELDS = {
   tenis: [
     ['rafagasMax', 'Ráfagas máx', 'km/h', 1],
     ['lluvia3hMax', 'Lluvia previa 3 h', 'mm', 0.5],
+    ['lluvia24hMax', 'Lluvia 24 h', 'mm', 1],
     ['probLluviaMax', 'Prob. lluvia máx', '%', 5],
     ['tempMin', 'Temp mín', '°C', 1],
     ['tempMax', 'Temp máx', '°C', 1]
